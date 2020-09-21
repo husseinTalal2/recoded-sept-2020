@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-var datasource = require('../data/mock_posts.js')
+var datasource = require('../data/mock_posts.js');
 
 /** EJS: A list of the recent posts on the Bulletin Board. */
 router.get('/recent', (req, res, next) => {

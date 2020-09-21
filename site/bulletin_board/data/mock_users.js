@@ -6,12 +6,11 @@ var users = {};
  * The callback takes a single parameter:
  * {
  *   success: boolean,
- *   redirect_uri: string,
- *   error_message: string
+ *   error_message: string,
+ *   user: user { id, username }
  * }
- * redirect_uri will always be defined when success is true.
  * error_message will always be defined when success is false.
- * redirect_uri must only be used when success is true.
+ * user will always be defined when success is true.
  */
 users.login = (credentials, callback) => {
   var success = false;
@@ -27,8 +26,8 @@ users.login = (credentials, callback) => {
 
   var result = {
     success: success,
-    redirect_uri: "/posts/recent",
-    error_message: error_message
+    error_message: error_message,
+    user: success ? { id: 2, username: "test" } : null
   };
   callback(result);
 }
@@ -39,12 +38,11 @@ users.login = (credentials, callback) => {
  * The callback takes a single parameter:
  * {
  *   success: boolean,
- *   redirect_uri: string,
- *   error_message: string
+ *   error_message: string,
+ *   user: user
  * }
- * redirect_uri will always be defined when success is true.
  * error_message will always be defined when success is false.
- * redirect_uri must only be used when success is true.
+ * user will always be defined when success is true.
  */
 users.signup = (credentials, callback) => {
   var success = false;
@@ -60,10 +58,33 @@ users.signup = (credentials, callback) => {
 
   var result = {
     success: success,
-    redirect_uri: "/posts/recent",
-    error_message: error_message
+    error_message: error_message,
+    user: success ? { id: 2, username: credentials.username } : null
   };
   callback(result);
 }
+
+/**
+ * Retrieves a user by id.
+ *
+ * The callback takes a single parameter, the user - which is non-null if the
+ * request was successful and a user was found.
+ *
+ * {
+ *   id: integer,
+ *   username: string,
+ * }
+ */
+users.get = (id, callback) => {
+  if (id != 2) {
+    return callback(null);
+  }
+
+  var user = {
+    id: id,
+    username: "test"
+  };
+  callback(user);
+};
 
 module.exports = users;

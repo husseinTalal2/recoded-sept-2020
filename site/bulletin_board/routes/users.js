@@ -21,10 +21,29 @@ router.post('/login', function(req, res, next) {
   var credentials = req.body;
 
   datasource.login(credentials, function(result) {
-    if (!result.success) {
-      res.status(403);
+    if (!result || !result.success) {
+      result = {
+        success: false,
+        error_message: result ? result.error_message : "Database error"
+      }
+      return res.status(403).send(result);
     }
-    res.send(result);
+
+    req.login({ id: result.user.id, username: result.user.username }, function(err) {
+      if (err) {
+        result = {
+          success: false,
+          error_message: err
+        }
+        return res.status(403).send(result);
+      }
+
+      result = {
+        success: true,
+        redirect_uri: "/posts/recent"
+      }
+      return res.send(result);
+    });
   });
 });
 
@@ -42,14 +61,26 @@ router.post('/login', function(req, res, next) {
  *   error_message: string
  * }
  */
-router.post('/', function(req, res, next) {
+router.post('/', (req, res, next) => {
   var credentials = req.body;
 
-  datasource.signup(credentials, function(result) {
+  datasource.signup(credentials, (result) => {
     if (!result.success) {
-      res.status(400);
+      result = {
+        success: false,
+        error_message: result.error_message
+      }
+      return res.status(400).send(result);
     }
-    res.send(result);
+
+    req.login(result.user, function(err) {
+      if (err) { return next(err); }
+      result = {
+        success: true,
+        redirect_uri: "/posts/recent"
+      };
+      res.send(result);
+    });
   });
 });
 
