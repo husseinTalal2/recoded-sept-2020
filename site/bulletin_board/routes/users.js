@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-var datasource = require('../data/mock_users.js')
+var datasource = require('../data/users.js')
 
 /**
  * The "Login" endpoint.

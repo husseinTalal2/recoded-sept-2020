@@ -1,6 +1,6 @@
 var passport = require('passport');
 
-var datasource = require('../data/mock_users.js');
+var datasource = require('../data/users.js');
 
 /**
  * We only store the user id.
