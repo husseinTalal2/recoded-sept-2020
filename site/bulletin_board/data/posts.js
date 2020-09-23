@@ -102,6 +102,12 @@ posts.recent = (userId, callback) => {
  */
 posts.trending = (userId, callback) => {
   // TODO: Implement trending sort
+  var timestamp = Math.round(new Date().getTime() / 1000);
+  var secondsPerMinute = 60;
+  var minutesPerHour = 60;
+  var hoursPerDay = 24;
+  var thirtyDaysInSeconds = 30 * hoursPerDay * minutesPerHour * secondsPerMinute;
+  var thirtyDaysAgo = timestamp - thirtyDaysInSeconds;
   var sql = `
     SELECT
       Posts.id AS id,
@@ -110,20 +116,18 @@ posts.trending = (userId, callback) => {
       Posts.date,
       PostUpvotes.post_id IS NOT NULL AS liked,
       '/posts/' + Posts.id AS url,
-      substr(Posts.body, 0, 140) AS excerpt,
-      COUNT(AllPostUpvotes.post_id) AS upvote_count
+      substr(Posts.body, 0, 140) AS excerpt
     FROM
       Posts
       INNER JOIN Users AS Author ON Posts.user_id = Author.id
       LEFT OUTER JOIN PostUpvotes ON PostUpvotes.post_id = Posts.id AND PostUpvotes.user_id = ?
-      LEFT OUTER JOIN PostUpvotes AS AllPostUpvotes ON PostUpvotes.post_id = Posts.id
-    GROUP BY
-      Posts.id
+    WHERE
+      timestamp > ?
     ORDER BY
-      upvote_count DESC
+      Posts.votes DESC
     LIMIT 100
   `;
-  db.all(sql, [ userId ], (err, rows) => {
+  db.all(sql, [ userId, thirtyDaysAgo ], (err, rows) => {
     if (err) {
       callback([]);
       return;
@@ -165,9 +169,10 @@ posts.create = (post, user, callback) => {
 
   var months = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
   var date = new Date();
-  var sql ='INSERT INTO posts (title, body, date, user_id) VALUES (?, ?, ?, ?)'
+  var sql ='INSERT INTO posts (title, body, date, user_id, timestamp) VALUES (?, ?, ?, ?, ?)'
   var now = months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
-  var params =[post.title, post.message, now, user.id]
+  var timestamp = Math.round(new Date().getTime() / 1000);
+  var params =[post.title, post.message, now, user.id, timestamp]
   db.run(sql, params, function (err, result) {
     var success = !err;
     var result = {
@@ -205,7 +210,14 @@ posts.upvote = (id, user, vote, callback) => {
   }
   var params =[id, user.id]
   db.run(sql, params, function (err, result) {
-    callback();
+    if (this.changes != 1) {
+      return callback();
+    }
+    var operator = vote ? "+" : "-";
+    sql ='UPDATE Posts SET vote = vote ' + operator + ' 1 WHERE post_id = ?'
+    db.run(sql, [id], function (err, result) {
+      callback();
+    });
   });
 };
 
