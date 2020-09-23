@@ -110,13 +110,17 @@ posts.trending = (userId, callback) => {
       Posts.date,
       PostUpvotes.post_id IS NOT NULL AS liked,
       '/posts/' + Posts.id AS url,
-      substr(Posts.body, 0, 140) AS excerpt
+      substr(Posts.body, 0, 140) AS excerpt,
+      COUNT(AllPostUpvotes.post_id) AS upvote_count
     FROM
       Posts
       INNER JOIN Users AS Author ON Posts.user_id = Author.id
       LEFT OUTER JOIN PostUpvotes ON PostUpvotes.post_id = Posts.id AND PostUpvotes.user_id = ?
+      LEFT OUTER JOIN PostUpvotes AS AllPostUpvotes ON PostUpvotes.post_id = Posts.id
+    GROUP BY
+      Posts.id
     ORDER BY
-      Posts.id DESC
+      upvote_count DESC
     LIMIT 100
   `;
   db.all(sql, [ userId ], (err, rows) => {
