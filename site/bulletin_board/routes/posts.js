@@ -5,14 +5,14 @@ var datasource = require('../data/posts.js');
 
 /** EJS: A list of the recent posts on the Bulletin Board. */
 router.get('/recent', (req, res, next) => {
-  datasource.recent((posts) => {
+  datasource.recent(req.user.id, (posts) => {
     res.render('post_list', { id: 'recent', title: 'Recent Posts', posts: posts });
   });
 });
 
 /** EJS: A list of the trending posts on the Bulletin Board. */
 router.get('/trending', (req, res, next) => {
-  datasource.trending((posts) => {
+  datasource.trending(req.user.id, (posts) => {
     res.render('post_list', { id: 'trending', title: 'Trending Posts', posts: posts });
   });
 });
@@ -24,8 +24,8 @@ router.get('/create', (req, res, next) => {
 
 /** EJS: The detailed view of a single post. */
 router.get('/:id', (req, res, next) => {
-  datasource.retrieve(req.params['id'], (post) => {
-    res.render('view_post', { title: 'Lorem ipsum dolor sit amet.', post: post });
+  datasource.retrieve(req.params['id'], req.user.id, (post) => {
+    res.render('view_post', { title: post.title, post: post });
   });
 });
 
@@ -66,10 +66,10 @@ router.post('/', function(req, res, next) {
  *   upvoted: boolean
  * }
  */
-router.post('/upvotes/', (req, res, next) => {
+router.post('/:id/upvotes/', (req, res, next) => {
   var vote = req.body;
 
-  posts_data.upvote(vote, () => {
+  datasource.upvote(req.params['id'], req.user, vote, () => {
     res.send();
   });
 });

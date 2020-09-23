@@ -6,6 +6,7 @@ var posts = {}
 /**
  * Retrieve a single post.
  * {
+ *   id: number,
  *   title: string,
  *   author: string,
  *   date: string,
@@ -14,20 +15,36 @@ var posts = {}
  *   body: string
  * }
  */
-posts.retrieve = (id, callback) => {
-  db.get("SELECT Posts.title, Users.username AS author, Posts.date, Posts.body AS body, false AS liked, '/posts/' + Posts.id AS url FROM Posts INNER JOIN Users ON Posts.user_id = Users.id  WHERE Posts.id = ? ORDER BY date DESC",
-    [ id ],
-    (err, row) => {
+posts.retrieve = (id, userId, callback) => {
+  var sql = `
+    SELECT
+      Posts.id AS id,
+      Posts.title,
+      Author.username AS author,
+      Posts.date,
+      Posts.body AS body,
+      PostUpvotes.post_id IS NOT NULL AS liked,
+      '/posts/' + Posts.id AS url
+    FROM
+      Posts
+      INNER JOIN Users AS Author ON Posts.user_id = Author.id
+      LEFT OUTER JOIN PostUpvotes ON PostUpvotes.post_id = Posts.id AND PostUpvotes.user_id = ?
+    WHERE
+      Posts.id = ?
+    ORDER BY
+      date DESC
+  `;
+  db.get(sql, [ userId, id ], (err, row) => {
     if (err || !row) {
       callback(null);
       return;
     }
-    // TODO: author, liked
     callback({
+      id: row.id,
       title: row.title,
       author: row.user_id,
       date: row.date,
-      liked: false,
+      liked: row.liked,
       url: "/posts/" + id,
       body: row.body
     });
@@ -45,9 +62,25 @@ posts.retrieve = (id, callback) => {
  *   excerpt: string
  * }
  */
-posts.recent = (callback) => {
-  // TODO: liked
-  db.all("SELECT Posts.title, Users.username AS author, Posts.date, Substr(Posts.body, 0, 140) AS excerpt, false AS liked, '/posts/' + Posts.id AS url FROM Posts INNER JOIN Users ON Posts.user_id = Users.id ORDER BY date DESC", (err, rows) => {
+posts.recent = (userId, callback) => {
+  var sql = `
+    SELECT
+      Posts.id AS id,
+      Posts.title,
+      Author.username AS author,
+      Posts.date,
+      PostUpvotes.post_id IS NOT NULL AS liked,
+      '/posts/' + Posts.id AS url,
+      substr(Posts.body, 0, 140) AS excerpt
+    FROM
+      Posts
+      INNER JOIN Users AS Author ON Posts.user_id = Author.id
+      LEFT OUTER JOIN PostUpvotes ON PostUpvotes.post_id = Posts.id AND PostUpvotes.user_id = ?
+    ORDER BY
+      Posts.id DESC
+    LIMIT 100
+  `;
+  db.all(sql, [ userId ], (err, rows) => {
     if (err) {
       callback([]);
       return;
@@ -67,10 +100,26 @@ posts.recent = (callback) => {
  *   excerpt: string
  * }
  */
-posts.trending = (callback) => {
-  // TODO: liked
+posts.trending = (userId, callback) => {
   // TODO: Implement trending sort
-  db.all("SELECT Posts.title, Users.username AS author, Posts.date, Substr(Posts.body, 0, 140) AS excerpt, false AS liked, '/posts/' + Posts.id AS url FROM Posts INNER JOIN Users ON Posts.user_id = Users.id ORDER BY date DESC", (err, rows) => {
+  var sql = `
+    SELECT
+      Posts.id AS id,
+      Posts.title,
+      Author.username AS author,
+      Posts.date,
+      PostUpvotes.post_id IS NOT NULL AS liked,
+      '/posts/' + Posts.id AS url,
+      substr(Posts.body, 0, 140) AS excerpt
+    FROM
+      Posts
+      INNER JOIN Users AS Author ON Posts.user_id = Author.id
+      LEFT OUTER JOIN PostUpvotes ON PostUpvotes.post_id = Posts.id AND PostUpvotes.user_id = ?
+    ORDER BY
+      Posts.id DESC
+    LIMIT 100
+  `;
+  db.all(sql, [ userId ], (err, rows) => {
     if (err) {
       callback([]);
       return;
@@ -132,8 +181,28 @@ posts.create = (post, user, callback) => {
  *
  * The callback takes no parameters.
  */
-posts.upvote = (vote, callback) => {
-  callback();
+posts.upvote = (id, user, vote, callback) => {
+  var success = true;
+  var error_message = "";
+
+  if (!success) {
+    var result = {
+      success: false,
+      error_message: error_message
+    };
+    return callback(result);
+  }
+
+  var sql;
+  if (vote) {
+    sql ='INSERT INTO PostUpvotes (post_id, user_id) VALUES (?, ?)'
+  } else {
+    sql ='DELETE FROM PostUpvotes WHERE post_id = ? AND user_id = ?'
+  }
+  var params =[id, user.id]
+  db.run(sql, params, function (err, result) {
+    callback();
+  });
 };
 
 module.exports = posts;
