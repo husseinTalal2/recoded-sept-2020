@@ -2,7 +2,7 @@
 
 Now that we have finished implementing the initial designs, there are a few enhancements we’d like to make...
 
-## User Profiles
+## Editing User Profiles
 
 Users should be able to manage their:
 
@@ -11,9 +11,17 @@ Users should be able to manage their:
 - Birthdate
 - Brief Bio / About Me text
 
-Create a profile page to allow users to view and edit their profile. (Note: the word “page” here is used from a user’s perspective - depending on your implementation this could be one or two endpoints that serve HTML.) These fields should be optional. If a user doesn’t want to give us this information they shouldn’t have to. How will you store this information?
+Create a profile page to allow users to edit their profile. These fields should be optional. If a user doesn’t want to give us this information they shouldn’t have to. How will you store this information?
 
 Wherever we display a username, the website should display the user's first and last names instead (if we have that information), and should link to user's profile view page.
+
+## Viewing User Profiles
+
+Users should be able to view others' profiles.
+
+Create a page that will display a nicely formatted version of a user's profile information.
+
+This is the page that other pages will link to when clicking on a user's name.
 
 ## Change Password
 
