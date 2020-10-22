@@ -221,5 +221,9 @@ posts.upvote = (id, user, vote, callback) => {
   });
 };
 
+posts.reply = (postId, userId, reply) => {
+  // this function receives post id and a reply then adds the reply to the DB 
+  
+}
 module.exports = posts;
 

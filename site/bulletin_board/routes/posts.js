@@ -74,4 +74,9 @@ router.post('/:id/upvotes/', (req, res, next) => {
   });
 });
 
+router.post('/reply/:postId', (req, res, next) => {
+  // this endpoint receives a reply text, id of the post, and the id of the user who replied
+
+})
+
 module.exports = router;
