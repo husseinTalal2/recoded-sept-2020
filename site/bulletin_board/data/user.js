@@ -8,8 +8,25 @@ const user = {};
 
 user.profile = (id, callback) => {
     // gets the info of the user and passes it to the callback 
+    const sql = "SELECT * FROM Users WHERE Users.id = ?";
 
+    db.get(sql, [id], (err, row) => {
+        if (err || !row) {
+            callback(null);
+            return;
+          }
+          console.log(row);
+          callback({
+            username : row.username,
+            firstname : row.firstname,
+            lastname : row.lastname,
+            bio : row.bio,
+            dob : row.dob,
+        });
+      
+    })
 }
+
 
 user.editProfile = (credentials, callback) => {
     // this function receives the new info of a user from the endpoint and a callback
