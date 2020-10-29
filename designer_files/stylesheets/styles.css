@@ -307,3 +307,8 @@
   /*height: auto; /* only if you want fixed height */
 }
 
+/* profile styles*/
+
+body .form-control {
+  border-radius: 1.25rem !important;
+}

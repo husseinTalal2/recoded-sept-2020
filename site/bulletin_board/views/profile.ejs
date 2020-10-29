@@ -1,0 +1,96 @@
+<%- include('header', { title: 'profile' }); %> <%- include('nav_bar', { id:
+'profile' }); %>
+
+
+
+<div class="container">
+    <div class="col-6 pt-5">
+        <h1>Welcome <%-  user.firstname || user.username %></h1>
+        <form id="profile_info_form">
+            <div class="form-label-group mt-4">
+                <input
+                    type="text"
+                    id="username"
+                    class="form-control"
+                    placeholder="Username"
+                    required
+                    autofocus
+                    value=<%- user.username %> 
+                />
+                <label for="change_user_username">Username</label>
+            </div>
+
+            <div class="form-label-group mt-4">
+                <input
+                    type="text"
+                    id="firstname"
+                    class="form-control"
+                    placeholder="firstname"
+                    value=<%- user.firstname %> 
+                />
+                <label for="firstname">Firstname</label>
+            </div>
+            <div class="form-label-group mt-4">
+                <input
+                    type="text"
+                    id="lastname"
+                    class="form-control"
+                    placeholder="lastname"
+                    value=<%- user.lastname %> 
+                />
+                <label for="lastname">Lastname</label>
+            </div>
+            <div class="form-label-group mt-4">
+                <input
+                    type="text"
+                    id="bio"
+                    class="form-control"
+                    placeholder="bio"
+                    value=<%- user.bio %> 
+                />
+                <label for="bio">Bio</label>
+            </div>
+            <div class="form-label-group mt-4">
+                <input
+                    type="date"
+                    id="dob"
+                    class="form-control"
+                    placeholder="dob"
+                    value=<%- user.dob || "" %> 
+                />
+                <label for="dob">Date of Birth</label>
+            </div>
+            <div>
+                <a href="/profile/change-password">Change Password</a>
+            </div>
+            <div class="mt-5">
+                <button
+                    class="btn btn-lg btn-primary btn-login text-uppercase font-weight-bold mb-2"
+                    type="submit"
+                    id="save-changes"
+                >
+                    Save changes
+                </button>
+                <button
+                    class="btn btn-lg btn-outline-danger btn-login text-uppercase font-weight-bold mb-2"
+                    type="button"
+                    id="discard"
+                >
+                    discard
+                </button>
+            </div>
+
+            <div
+                class="alert alert-danger fade show"
+                style="display: none"
+                id="change_user_error"
+            >
+                <h4 class="alert-heading">Error!</h4>
+                <span id="change_user_error_message"></span>
+            </div>
+        </form>
+    </div>
+    <div class="col-6"></div>
+</div>
+
+<%- include('footer', { javascript_uri: '/javascripts/change_profile_info.js' }); %>
